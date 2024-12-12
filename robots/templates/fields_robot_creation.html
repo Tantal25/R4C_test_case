@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Форма для сохранения данных о производстве роботов
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    {% csrf_token %}
+    <h2> Введите данные о произведенном роботе </h2>
+    <table>
+      {{ form }}
+    </table>  
+    <input type="submit" value="Подтвердить">
+  </form>
+  {% with data=request.POST %}
+    {% if form.is_valid %}
+      <h2> Данные о производстве робота модели {{ data.model }}, версии {{ data.version }} приняты </h2>
+    {% endif %}
+  {% endwith %} 
+{% endblock %}
