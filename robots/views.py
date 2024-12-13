@@ -1,58 +1,68 @@
 import json
 
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from .validation import validate_model
+
 from .models import Robot
-from .forms import RobotForm
+from .forms import JsonForm, RobotForm
 
 
-def robot_creation_through_fields(request):
-    """Вью функция создающая робота в базе данных через шаблон с полями."""
-    form = RobotForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-    return render(request, 'fields_robot_creation.html', {'form': form})
-
-
-def robot_creation_through_json(request):
+def json_robot_creation(request):
     """Вью функция создающая робота в базе данных через шаблон c JSON."""
-    try:
-        request_data = json.loads(request.POST.get('json_data'))
+    form = JsonForm(request.POST or None)
+    if request.method == 'POST':
+        form2 = RobotForm(json.loads(request.POST['json_data']))
+        result_message = ''
+        if form2.is_valid():
+            data = form2.cleaned_data
 
-        validate_model(request_data['model'])
-        Robot.objects.create(**request_data)
+            Robot.objects.create(
+                serial=f"{data['model']}-{data['version']}",
+                model=data.get('model'),
+                version=data.get('version'),
+                created=data.get('created')
+            )
 
-        return JsonResponse({
-                'Cообщение': 'Данные о производстве робота приняты',
-                'model': request_data['model'],
-                'version': request_data['version']
-            })
+            result_message = (
+                f'Данные о производстве робота модели {data['model']} '
+                f'версии {data['version']} приняты'
+            )
 
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Неправильный формат JSON'}, status=400)
+        if result_message:
+            final_dict = {'result_message': result_message}
+        else:
+            final_dict = {'form': form2}
+
+        return render(request, 'json_robot_creation.html', final_dict)
+
+    return render(request, 'json_robot_creation.html', {'form': form})
 
 
 @csrf_exempt
 @require_http_methods(('POST',))
-def robot_creation_without_csrf(request):
+def robot_creation_API(request):
     """"Вью для эндпоинта, создающая робота в базе данных через запрос."""
     try:
-        request_data = json.loads(request.body)
+        form = RobotForm(json.loads(request.body))
+        if form.is_valid():
+            data = form.cleaned_data
 
-        # Проверяем есть ли модель в списке разрешенных
-        validate_model(request_data['model'])
+            Robot.objects.create(
+                model=data['model'],
+                version=data['version'],
+                created=data['created'],
+                serial=f"{data['model']}-{data['version']}"
+            )
 
-        Robot.objects.create(**request_data)
-
-        return JsonResponse({
-            'Cообщение': 'Данные о производстве робота приняты',
-            'model': request_data['model'],
-            'version': request_data['version']
-        })
+            return JsonResponse({
+                'Cообщение': 'Данные о производстве робота приняты',
+                'model': data['model'],
+                'version': data['version']
+            })
+        return JsonResponse({'error': form.errors}, status=400)
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Неправильный формат JSON'}, status=400)

@@ -8,13 +8,26 @@
   <form method="post">
     {% csrf_token %}
     <h2> Вставьте JSON с информацией о произведенном роботе </h2>
-    <form onsubmit="submitForm(event)">
-        <textarea id="json-data" rows="10" cols="50" placeholder='{"key": "value"}'></textarea><br>
+    
+    <textarea name="json_data" placeholder="Введите JSON данные" rows="10" cols="50">{{ request.POST.json_data }}</textarea>
+    
     <input type="submit" value="Подтвердить">
   </form>
-  {% with data=request.POST %}
-    {% if form.is_valid %}
-      <h2> Данные о производстве робота модели {{ data.model }}, версии {{ data.version }} приняты </h2>
-    {% endif %}
-  {% endwith %} 
+  {% if result_message %}
+    <div class="success-message">
+      <h3>{{ result_message }}</h3>
+    </div>
+  {% endif %}
+
+  {% if form.errors %}
+    <div class="errorlist">
+      <h3>Ошибки в форме:</h3>
+      <ul>
+        {% for field, errors in form.errors.items %}
+          <li>{{ field }}: {{ errors|join:", " }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
 {% endblock %}

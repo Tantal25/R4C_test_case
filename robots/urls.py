@@ -1,14 +1,20 @@
 from django.urls import path
 
 from robots.views import (
-    robot_creation_through_fields,
-    robot_creation_through_json,
-    robot_creation_without_csrf
+    json_robot_creation,
+    robot_creation_API
     )
 
 
 urlpatterns = [
-    path('fields_robot_creation/', robot_creation_through_fields),
-    path('json_robot_creation/', robot_creation_through_json),
-    path('robot_creation_without_csrf/', robot_creation_without_csrf)
+    path(
+        'json_robot_creation/',
+        json_robot_creation,
+        name='json_robot_creation'
+        ),
+    path(
+        'robot_creation_API/',
+        robot_creation_API,
+        name='robot_creation_API'
+        )
 ]

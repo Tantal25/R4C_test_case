@@ -8,7 +8,12 @@ allowed_robot_models = {
 }
 
 
-def validate_model(model):
-    """Функция проверяющая входит ли модель в список разрешенных."""
-    if model not in allowed_robot_models:
-        raise ValidationError('This model is not allowed')
+def validate_model(data):
+    """
+    Валидатор проверяет наличие
+    модели робота в списке разрешенных.
+    """
+    if 'model' not in data:
+        raise ValidationError('Передана некорректная модель робота')
+    if data['model'] not in allowed_robot_models:
+        raise ValidationError('Эта модель робота не разрешена')
