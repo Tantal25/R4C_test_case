@@ -5,9 +5,34 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-
-from .models import Robot
 from .forms import JsonForm, RobotForm
+from .services import (
+    db_robot_creation, get_robots_created_for_week,
+    prepare_empty_excel_workbook, prepare_robot_data_before_writing,
+    writing_robots_data_in_excel_file, prepare_excel_file_for_sending
+    )
+
+
+@csrf_exempt
+@require_http_methods(('POST',))
+def robot_creation_API(request):
+    """"Вью для эндпоинта, создающая робота в базе данных через запрос."""
+    try:
+        # Передаем преобразованные из JSON данные в форму связанную с моделью
+        form = RobotForm(json.loads(request.body))
+
+        if form.is_valid():
+            # Создаем робота и возвращаем результат создания
+            return JsonResponse(db_robot_creation(form.cleaned_data))
+
+        # Если форма не ваоидна, возвращаем возникшую ошибку
+        return JsonResponse({'error': form.errors}, status=400)
+
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {'error': 'Некорректный формат, передайте данные в формате JSON.'},
+            json_dumps_params={'ensure_ascii': False}, status=400
+        )
 
 
 def json_robot_creation(request):
@@ -45,43 +70,34 @@ def json_robot_creation(request):
             )
 
 
-@csrf_exempt
-@require_http_methods(('POST',))
-def robot_creation_API(request):
-    """"Вью для эндпоинта, создающая робота в базе данных через запрос."""
-    try:
-        # Передаем преобразованные из JSON данные в форму связанную с моделью
-        form = RobotForm(json.loads(request.body))
-
-        if form.is_valid():
-            # Создаем робота и возвращаем результат создания
-            return JsonResponse(db_robot_creation(form.cleaned_data))
-
-        # Если форма не ваоидна, возвращаем возникшую ошибку
-        return JsonResponse({'error': form.errors}, status=400)
-
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {'error': 'Некорректный формат, передайте данные в формате JSON.'},
-            json_dumps_params={'ensure_ascii': False}, status=400
-        )
-
-
-def db_robot_creation(data):
+@require_http_methods(('GET',))
+def production_report(request):
     """
-    Функция создающая в базе данных запись о произведенном роботе
-    на основе полученных данных. Возвращает результирующее сообщение.
+    Вью функция генерирующая отчет по произведенным роботам
+    за неделю и отправляющая Excel файл.
     """
+    # Получаем отсортированную выборку роботов произведенных за неделю
+    grouped_robots = get_robots_created_for_week()
 
-    Robot.objects.create(
-        model=data['model'],
-        version=data['version'],
-        created=data['created'],
-        serial=f"{data['model']}-{data['version']}"
-        )
+    if not grouped_robots:
+        return HttpResponse(
+            "В базе данных нет роботов произведенных за последнюю неделю",
+            status=400
+            )
 
-    return {
-        'Результат': 'Данные о производстве робота приняты',
-        'model': data['model'],
-        'version': data['version']
-        }
+    # Создаем наш пустой Excel workbook
+    workbook = prepare_empty_excel_workbook()
+
+    # Подготавливаем данные по роботам к записи
+    robots_data = prepare_robot_data_before_writing(grouped_robots)
+
+    # Заполняем отчет
+    writing_robots_data_in_excel_file(robots_data, workbook)
+
+    # Подготавливаем файл для отправки
+    excel_file = prepare_excel_file_for_sending(workbook)
+
+    response = HttpResponse(excel_file, content_type='application/ms-excel')
+    response['Content-Disposition'] = (
+        'attachment; filename=proudction_report.xlsx')
+    return response
