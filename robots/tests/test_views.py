@@ -28,7 +28,7 @@ class RobotCreationAPI(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json()['Cообщение'],
+            response.json()['Результат'],
             'Данные о производстве робота приняты'
         )
         self.assertEqual(Robot.objects.count(), 1)
@@ -49,11 +49,10 @@ class RobotCreationAPI(TestCase):
             json.dumps(invalid_data),
             content_type='application/json'
         )
-
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json())
         self.assertIn(
-            'Эта модель робота не разрешена', 
+            'Эта модель робота не разрешена',
             response.json()['error']['__all__']
         )
 
@@ -69,6 +68,7 @@ class RobotCreationAPI(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.json())
 
     def test_robot_creation_with_invalid_json(self):
         response = self.client.post(
@@ -77,4 +77,8 @@ class RobotCreationAPI(TestCase):
             content_type='application/json'
             )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'Неправильный формат JSON')
+        self.assertIn('error', response.json())
+        self.assertEqual(
+            response.json()['error'],
+            'Некорректный формат, передайте данные в формате JSON.'
+            )

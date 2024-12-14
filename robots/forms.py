@@ -7,6 +7,8 @@ from .models import Robot
 
 
 class JsonForm(forms.Form):
+    """Форма для приема JSON целиком через темплейт."""
+
     json_data = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
@@ -17,6 +19,7 @@ class JsonForm(forms.Form):
 
 
 class RobotForm(forms.ModelForm):
+    """Форма привязанная к полям модели робота."""
 
     class Meta:
         model = Robot

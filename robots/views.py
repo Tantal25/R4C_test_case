@@ -11,34 +11,38 @@ from .forms import JsonForm, RobotForm
 
 
 def json_robot_creation(request):
-    """Вью функция создающая робота в базе данных через шаблон c JSON."""
-    form = JsonForm(request.POST or None)
-    if request.method == 'POST':
-        form2 = RobotForm(json.loads(request.POST['json_data']))
-        result_message = ''
-        if form2.is_valid():
-            data = form2.cleaned_data
+    """
+    Вью функция создающая робота в базе данных
+    через передачу JSON в HTML темплейт.
+    """
+    # Форма для отрисовки в шаблоне при переданном GET запросе
 
-            Robot.objects.create(
-                serial=f"{data['model']}-{data['version']}",
-                model=data.get('model'),
-                version=data.get('version'),
-                created=data.get('created')
+    try:
+        form = JsonForm()
+        if request.method == 'POST':
+            # Передаем преобразованные из JSON данные в форму связанную
+            # с моделью, для валидации по полям модели.
+            form2 = RobotForm(json.loads(request.POST['json_data']))
+
+            if form2.is_valid():
+                # Если форма валидна создаем робота и возвращаем результат
+                result = {
+                    'result_message': db_robot_creation(form2.cleaned_data)
+                    }
+            else:
+                # Если форма не валидна, возвращаем причину сбоя
+                result = {'form': form2}
+
+            return render(request, 'json_robot_creation.html', result)
+
+        # Рендерим форму для ввода при GET запросе
+        return render(request, 'json_robot_creation.html', {'form': form})
+
+    except json.JSONDecodeError:
+        return HttpResponse(
+            'Ошибка - некорректный формат данных. '
+            'Передайте данные в формате JSON.', status=400
             )
-
-            result_message = (
-                f'Данные о производстве робота модели {data['model']} '
-                f'версии {data['version']} приняты'
-            )
-
-        if result_message:
-            final_dict = {'result_message': result_message}
-        else:
-            final_dict = {'form': form2}
-
-        return render(request, 'json_robot_creation.html', final_dict)
-
-    return render(request, 'json_robot_creation.html', {'form': form})
 
 
 @csrf_exempt
@@ -46,23 +50,38 @@ def json_robot_creation(request):
 def robot_creation_API(request):
     """"Вью для эндпоинта, создающая робота в базе данных через запрос."""
     try:
+        # Передаем преобразованные из JSON данные в форму связанную с моделью
         form = RobotForm(json.loads(request.body))
+
         if form.is_valid():
-            data = form.cleaned_data
+            # Создаем робота и возвращаем результат создания
+            return JsonResponse(db_robot_creation(form.cleaned_data))
 
-            Robot.objects.create(
-                model=data['model'],
-                version=data['version'],
-                created=data['created'],
-                serial=f"{data['model']}-{data['version']}"
-            )
-
-            return JsonResponse({
-                'Cообщение': 'Данные о производстве робота приняты',
-                'model': data['model'],
-                'version': data['version']
-            })
+        # Если форма не ваоидна, возвращаем возникшую ошибку
         return JsonResponse({'error': form.errors}, status=400)
 
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Неправильный формат JSON'}, status=400)
+        return JsonResponse(
+            {'error': 'Некорректный формат, передайте данные в формате JSON.'},
+            json_dumps_params={'ensure_ascii': False}, status=400
+        )
+
+
+def db_robot_creation(data):
+    """
+    Функция создающая в базе данных запись о произведенном роботе
+    на основе полученных данных. Возвращает результирующее сообщение.
+    """
+
+    Robot.objects.create(
+        model=data['model'],
+        version=data['version'],
+        created=data['created'],
+        serial=f"{data['model']}-{data['version']}"
+        )
+
+    return {
+        'Результат': 'Данные о производстве робота приняты',
+        'model': data['model'],
+        'version': data['version']
+        }
