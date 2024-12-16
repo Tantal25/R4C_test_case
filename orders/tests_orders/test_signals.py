@@ -7,6 +7,7 @@ from robots.models import Robot
 
 
 class OrderReadySignalTests(TestCase):
+    """Тесты на сигнал готовности заказа."""
 
     def setUp(self):
         self.customer = Customer.objects.create(email='customer@example.com')

@@ -11,6 +11,7 @@ from robots.services import (
 
 
 class RobotFunctionsTests(TestCase):
+    """Тесты к сервисным функциям создания роботов."""
 
     def setUp(self):
         self.robot_data = {
@@ -20,6 +21,7 @@ class RobotFunctionsTests(TestCase):
         }
 
     def test_db_robot_creation(self):
+        """Тест функции создания робота в БД."""
         result = db_robot_creation(self.robot_data)
         self.assertEqual(Robot.objects.count(), 1)
         robot = Robot.objects.filter(**self.robot_data).first()
@@ -31,6 +33,7 @@ class RobotFunctionsTests(TestCase):
         self.assertEqual(robot.version, self.robot_data['version'])
 
     def test_get_robots_created_for_week(self):
+        """Тест функции, получающей выборку роботов за неделю."""
         # Создаем роботов, которые будут в выборке
         db_robot_creation(self.robot_data)
         db_robot_creation(self.robot_data)
@@ -51,10 +54,14 @@ class RobotFunctionsTests(TestCase):
         self.assertEqual(robots[0]['count'], 2)
 
     def test_prepare_empty_excel_workbook(self):
+        """Тест функции, подготваливающей пустой Excel Workbook."""
         workbook = prepare_empty_excel_workbook()
         self.assertEqual(len(workbook.sheetnames), 0)
 
     def test_prepare_robot_data_before_writing(self):
+        """
+        Тест функции, подготваливающей данные роботов к записи в Excel таблице.
+        """
         grouped_robots = [
             {'model': 'R2', 'version': 'D2', 'count': 2},
             {'model': 'R2', 'version': 'D2', 'count': 1},

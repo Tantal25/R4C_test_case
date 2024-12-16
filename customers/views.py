@@ -18,16 +18,14 @@ def create_customer(request):
 
             return render(
                 request,
-                'create_customer.html',
-                {'result_message': 'Регистрация прошла успешно.'}
-                )
+                'customers/create_customer.html',
+                {'result_message': 'Регистрация прошла успешно.'})
 
         # Если форма не валидна, возвращаем ошибку
         return HttpResponseBadRequest(render(
             request,
-            'create_customer.html',
-            {'form': form})
-            )
+            'customers/create_customer.html',
+            {'form': form}))
 
     # Рендерим форму для ввода при GET запросе
-    return render(request, 'create_customer.html', {'form': form})
+    return render(request, 'customers/create_customer.html', {'form': form})

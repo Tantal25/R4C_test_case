@@ -26,7 +26,7 @@ def create_order(request):
 
             return render(
                 request,
-                'create_order.html',
+                'orders/create_order.html',
                 {'result_message':
                  f'Заказ на робота {data['robot_serial']} принят.'}
                  )
@@ -34,8 +34,8 @@ def create_order(request):
         else:
             # Если форма не валидна, возвращаем причину сбоя в форме
             return HttpResponseBadRequest(
-                render(request, 'create_order.html', {'form': form})
+                render(request, 'orders/create_order.html', {'form': form})
                 )
 
     # Рендерим форму для ввода при GET запросе
-    return render(request, 'create_order.html', {'form': form})
+    return render(request, 'orders/create_order.html', {'form': form})

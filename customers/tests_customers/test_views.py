@@ -5,6 +5,8 @@ from customers.models import Customer
 
 
 class CreateCustomersTests(TestCase):
+    """Тесты на создание пользователей."""
+
     def setUp(self):
         self.client = Client()
         self.url = reverse('create_customer')

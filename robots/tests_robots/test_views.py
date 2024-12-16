@@ -17,6 +17,8 @@ VALID_DATA = {
 
 
 class RobotCreationAPITests(TestCase):
+    """Тесты создания роботов в базе данных через API."""
+
     def setUp(self):
         self.client = Client()
         self.url = reverse('robot_creation_API')
@@ -29,6 +31,7 @@ class RobotCreationAPITests(TestCase):
             content_type='application/json'
         )
 
+        # Проверяем успешность POST запроса
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json()['Результат'],
@@ -36,6 +39,7 @@ class RobotCreationAPITests(TestCase):
         )
         self.assertEqual(Robot.objects.count(), 1)
 
+        # Проверяем корректность переданных данных
         robot = Robot.objects.first()
         self.assertEqual(robot.model, 'R2')
         self.assertEqual(robot.version, 'D2')
@@ -88,6 +92,7 @@ class RobotCreationAPITests(TestCase):
 
 
 class JsonRobotCreationViewTests(TestCase):
+    """Тесты создания роботов в базе данных через HTML шаблон."""
     def setUp(self):
         self.client = Client()
         self.url = reverse('json_robot_creation')
@@ -98,11 +103,12 @@ class JsonRobotCreationViewTests(TestCase):
             self.url,
             {'json_data': json.dumps(self.valid_data)}
         )
-
+        # Проверяем успешность POST запроса
         self.assertEqual(response.status_code, 200)
         self.assertIn('result_message', response.context)
-
         self.assertEqual(Robot.objects.count(), 1)
+
+        # Проверяем успешность POST запроса
         robot = Robot.objects.first()
         self.assertEqual(robot.model, 'R2')
         self.assertEqual(robot.version, 'D2')
@@ -169,6 +175,7 @@ class JsonRobotCreationViewTests(TestCase):
 
 
 class ProductReportViewTests(TestCase):
+    """Тесты для создания отчета по производству роботов."""
 
     def setUp(self):
         self.client = Client()
@@ -181,13 +188,14 @@ class ProductReportViewTests(TestCase):
             )
 
     def test_product_report(self):
-        # Создаем роботов
+        # Создаем роботов в БД
         self.create_robot(model='R2', version='D2', created=timezone.now())
         self.create_robot(model='X5', version='LT', created=timezone.now())
         self.create_robot(model='R2', version='D3', created=timezone.now())
 
         response = self.client.get(reverse('production_report'))
 
+        # Првоеряем успешность запроса
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response['Content-Disposition'],
@@ -200,7 +208,7 @@ class ProductReportViewTests(TestCase):
         # Проверяем наличие листов
         self.assertEqual(len(workbook.sheetnames), 2)
 
-        # Проверяем корректность заполнения листов
+        # Проверяем корректность заполнения двух листов
         sheet_a = workbook['R2']
         self.assertEqual(sheet_a.cell(row=1, column=1).value, 'Модель')
         self.assertEqual(sheet_a.cell(row=2, column=1).value, 'R2')
@@ -209,14 +217,13 @@ class ProductReportViewTests(TestCase):
         self.assertEqual(sheet_a.cell(row=3, column=1).value, 'R2')
         self.assertEqual(sheet_a.cell(row=3, column=2).value, 'D3')
         self.assertEqual(sheet_a.cell(row=3, column=3).value, 1)
-
         sheet_b = workbook['X5']
         self.assertEqual(sheet_b.cell(row=1, column=1).value, 'Модель')
         self.assertEqual(sheet_b.cell(row=2, column=1).value, 'X5')
         self.assertEqual(sheet_b.cell(row=2, column=2).value, 'LT')
         self.assertEqual(sheet_b.cell(row=2, column=3).value, 1)
 
-    def test_production_report_no_data(self):
+    def test_production_report_with_no_data(self):
 
         response = self.client.get(reverse('production_report'))
         # Проверяем статус ответа

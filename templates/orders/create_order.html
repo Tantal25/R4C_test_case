@@ -1,20 +1,19 @@
 {% extends "base.html" %}
 
 {% block title %}
-  Форма для создания покупателей
+  Форма для заказа роботов
 {% endblock %}
 
 {% block content %}
-  <h3>Введите email для регистрации покупателя</h3>
+  <h2>Введите серийный номер интересующего вас робота и ваш email </h2>
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">Подтвердить</button>
+    <input type="submit" value="Создать заказ">
   </form>
   {% if result_message %}
     <div class="success-message">
       <h3>{{ result_message }}</h3>
     </div>
   {% endif %}
-
 {% endblock %}

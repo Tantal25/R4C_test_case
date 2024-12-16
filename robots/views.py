@@ -62,10 +62,10 @@ def json_robot_creation(request):
                 # Если форма не валидна, возвращаем причину сбоя
                 result = {'form': form2}
 
-            return render(request, 'json_robot_creation.html', result)
+            return render(request, 'robots/json_robot_creation.html', result)
 
         # Рендерим форму для ввода при GET запросе
-        return render(request, 'json_robot_creation.html', {'form': form})
+        return render(request, 'robots/json_robot_creation.html', {'form': form})
 
     except json.JSONDecodeError:
         return HttpResponse(
