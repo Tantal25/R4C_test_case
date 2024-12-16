@@ -5,12 +5,10 @@
 {% endblock %}
 
 {% block content %}
+  <h2> Вставьте JSON с информацией о произведенном роботе </h2>
   <form method="post">
     {% csrf_token %}
-    <h2> Вставьте JSON с информацией о произведенном роботе </h2>
-    
     <textarea name="json_data" placeholder="Введите JSON данные" rows="10" cols="50">{{ request.POST.json_data }}</textarea>
-    
     <input type="submit" value="Подтвердить">
   </form>
   {% if result_message %}

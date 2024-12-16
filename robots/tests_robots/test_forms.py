@@ -3,7 +3,7 @@ import json
 from django.test import TestCase
 from django.urls import reverse
 
-from ..forms import JsonForm, RobotForm
+from robots.forms import JsonForm, RobotForm
 from .test_views import VALID_DATA
 
 

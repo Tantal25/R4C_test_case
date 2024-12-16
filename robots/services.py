@@ -20,11 +20,10 @@ def db_robot_creation(data):
         serial=f"{data['model']}-{data['version']}"
         )
 
-    return {
-        'Результат': 'Данные о производстве робота приняты',
-        'model': data['model'],
-        'version': data['version']
-        }
+    return (
+        'Данные о производстве робота '
+        f"модели {data['model']}, версии {data['version']} приняты"
+        )
 
 
 def get_robots_created_for_week():

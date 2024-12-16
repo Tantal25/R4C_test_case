@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.utils import timezone
 
-from ..models import Robot
-from ..services import (
+from robots.models import Robot
+from robots.services import (
     db_robot_creation,
     get_robots_created_for_week,
     prepare_empty_excel_workbook,
@@ -20,19 +20,18 @@ class RobotFunctionsTests(TestCase):
         }
 
     def test_db_robot_creation(self):
-
         result = db_robot_creation(self.robot_data)
-
         self.assertEqual(Robot.objects.count(), 1)
+        robot = Robot.objects.filter(**self.robot_data).first()
         self.assertEqual(
-            result['Результат'],
-            'Данные о производстве робота приняты'
+            result,
+            'Данные о производстве робота модели R2, версии D2 приняты'
             )
-        self.assertEqual(result['model'], self.robot_data['model'])
-        self.assertEqual(result['version'], self.robot_data['version'])
+        self.assertEqual(robot.model, self.robot_data['model'])
+        self.assertEqual(robot.version, self.robot_data['version'])
 
     def test_get_robots_created_for_week(self):
-        # Создаем роботов, который будет в выборке
+        # Создаем роботов, которые будут в выборке
         db_robot_creation(self.robot_data)
         db_robot_creation(self.robot_data)
 

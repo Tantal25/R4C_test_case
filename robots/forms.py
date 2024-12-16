@@ -2,7 +2,7 @@ import json
 
 from django import forms
 
-from .validation import validate_model
+from .validation import validate_model, validate_version
 from .models import Robot
 
 
@@ -28,4 +28,5 @@ class RobotForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         validate_model(cleaned_data)
+        validate_version(cleaned_data)
         return cleaned_data
