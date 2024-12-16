@@ -8,6 +8,8 @@ from .test_views import VALID_DATA
 
 
 class JsonFormTests(TestCase):
+    """Тесты формы принимающей JSON целиком."""
+
     def setUp(self):
         self.url = reverse('json_robot_creation')
         self.valid_data = VALID_DATA
@@ -50,6 +52,7 @@ class JsonFormTests(TestCase):
 
 
 class RobotFormTests(TestCase):
+    """Тесты для формы создания Robot."""
 
     def setUp(self):
         self.url = reverse('robot_creation_API')

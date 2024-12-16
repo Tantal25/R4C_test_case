@@ -11,6 +11,7 @@
     <textarea name="json_data" placeholder="Введите JSON данные" rows="10" cols="50">{{ request.POST.json_data }}</textarea>
     <input type="submit" value="Подтвердить">
   </form>
+  
   {% if result_message %}
     <div class="success-message">
       <h3>{{ result_message }}</h3>

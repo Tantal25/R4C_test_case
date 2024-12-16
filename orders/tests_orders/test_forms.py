@@ -6,6 +6,8 @@ from customers.models import Customer
 
 
 class OrderFormTests(TestCase):
+    """Тесты для формы создания заказов."""
+
     def setUp(self):
         self.client = Client()
         self.url = reverse('create_order')

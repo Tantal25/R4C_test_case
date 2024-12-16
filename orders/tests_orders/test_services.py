@@ -9,6 +9,7 @@ from orders.services import (
 
 
 class OrdersServicesTests(TestCase):
+    """Тесты на сервисные функции к созданию заказов."""
 
     def setUp(self):
         self.customer = Customer.objects.create(email='customer@example.com')
