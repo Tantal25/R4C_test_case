@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.urls import reverse
 from openpyxl import load_workbook
 
-from ..models import Robot
+from robots.models import Robot
 
 
 VALID_DATA = {
@@ -32,7 +32,7 @@ class RobotCreationAPITests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json()['Результат'],
-            'Данные о производстве робота приняты'
+            'Данные о производстве робота модели R2, версии D2 приняты'
         )
         self.assertEqual(Robot.objects.count(), 1)
 

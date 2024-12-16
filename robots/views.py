@@ -23,7 +23,10 @@ def robot_creation_API(request):
 
         if form.is_valid():
             # Создаем робота и возвращаем результат создания
-            return JsonResponse(db_robot_creation(form.cleaned_data))
+
+            return JsonResponse(
+                {'Результат': db_robot_creation(form.cleaned_data)}
+                )
 
         # Если форма не ваоидна, возвращаем возникшую ошибку
         return JsonResponse({'error': form.errors}, status=400)
@@ -54,6 +57,7 @@ def json_robot_creation(request):
                 result = {
                     'result_message': db_robot_creation(form2.cleaned_data)
                     }
+
             else:
                 # Если форма не валидна, возвращаем причину сбоя
                 result = {'form': form2}
